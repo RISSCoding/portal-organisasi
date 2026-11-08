@@ -18,6 +18,8 @@ import { AttachmentController } from './attachments/attachment.controller';
 import { AttachmentService } from './attachments/attachment.service';
 import { HrController } from './hr/hr.controller';
 import { HrService } from './hr/hr.service';
+import { SearchController } from './search/search.controller';
+import { SearchService } from './search/search.service';
 import { MemberController } from './members/member.controller';
 import { TaskController } from './tasks/task.controller';
 import { TaskService } from './tasks/task.service';
@@ -41,6 +43,7 @@ import { ApprovalService } from './approvals/approval.service';
     InvitationController,
     AttachmentController,
     HrController,
+    SearchController,
     MemberController,
     TaskController,
     CommentController,
@@ -57,6 +60,7 @@ import { ApprovalService } from './approvals/approval.service';
     InvitationService,
     AttachmentService,
     HrService,
+    SearchService,
     TaskService,
     CommentService,
     DocumentService,

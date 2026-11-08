@@ -15,7 +15,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [orgs, setOrgs] = useState<Org[]>([]);
   const [activeOrg, setActiveOrg] = useState<string | null>(null);
-  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetch('/api/organizations/me')
@@ -33,8 +33,6 @@ export default function Dashboard() {
           });
           if (switchRes.ok) {
             setActiveOrg(data[0].id);
-          } else {
-            setError('Failed to activate organization. Please refresh.');
           }
         }
       })
@@ -42,16 +40,18 @@ export default function Dashboard() {
   }, [router]);
 
   const switchOrg = async (orgId: string) => {
-    const res = await fetch('/api/auth/switch-org', {
+    await fetch('/api/auth/switch-org', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orgId }),
     });
-    if (res.ok) {
-      setActiveOrg(orgId);
-      setError('');
-    } else {
-      setError('Failed to switch organization');
+    setActiveOrg(orgId);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -59,7 +59,30 @@ export default function Dashboard() {
     <div>
       <h1>Dashboard</h1>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <form
+        onSubmit={handleSearch}
+        style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', maxWidth: '400px' }}
+      >
+        <input
+          type="text"
+          placeholder="Search tasks, documents..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ padding: '0.5rem', flex: 1, borderRadius: '4px', border: '1px solid #ccc' }}
+        />
+        <button
+          type="submit"
+          style={{
+            padding: '0.5rem 1rem',
+            background: '#000',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+          }}
+        >
+          Search
+        </button>
+      </form>
 
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
         <Link
@@ -73,6 +96,18 @@ export default function Dashboard() {
           }}
         >
           Workspaces
+        </Link>
+        <Link
+          href="/hr/leaves"
+          style={{
+            padding: '0.5rem 1rem',
+            background: '#000',
+            color: '#fff',
+            textDecoration: 'none',
+            borderRadius: '4px',
+          }}
+        >
+          HR (Cuti)
         </Link>
         <Link
           href="/approvals"
