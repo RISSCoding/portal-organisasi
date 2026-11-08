@@ -78,7 +78,7 @@ describe('HTTP E2E — Invitation Flow', () => {
   let cookieInvitee: string;
   let orgId: string;
   let inviteToken: string;
-  const server = () => app.getHttpServer() as http.Server;
+  const server = () => app.getHttpServer() as unknown as http.Server;
 
   it('setup: register owner & invitee, create org', async () => {
     await request(server())

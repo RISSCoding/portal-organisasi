@@ -76,7 +76,7 @@ describe('HTTP E2E — Approval Workflow', () => {
   let orgId: string;
   let orgOtherId: string;
   let requestId: string;
-  const server = () => app.getHttpServer() as http.Server;
+  const server = () => app.getHttpServer() as unknown as http.Server;
 
   it('setup: register users, create orgs, add member', async () => {
     await request(server())

@@ -77,7 +77,7 @@ describe('HTTP E2E — Workspace RBAC', () => {
   let cookieOwner: string;
   let cookieMember: string;
   let orgId: string;
-  const server = () => app.getHttpServer() as http.Server;
+  const server = () => app.getHttpServer() as unknown as http.Server;
 
   it('setup: register owner & member, create org, add member', async () => {
     await request(server())

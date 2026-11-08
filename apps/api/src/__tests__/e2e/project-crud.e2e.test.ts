@@ -76,7 +76,7 @@ describe('HTTP E2E — Project CRUD', () => {
   let orgId: string;
   let orgOtherId: string;
   let workspaceId: string;
-  const server = () => app.getHttpServer() as http.Server;
+  const server = () => app.getHttpServer() as unknown as http.Server;
 
   it('setup: register users, create orgs, add member, seed workspace', async () => {
     await request(server())

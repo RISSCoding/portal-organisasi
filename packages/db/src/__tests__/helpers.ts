@@ -91,5 +91,5 @@ export async function withCtx<T>(
     await tx`SELECT set_config('app.current_organization_id', ${orgId ?? ''}, true)`;
     return fn(tx);
   });
-  return result as T;
+  return result;
 }

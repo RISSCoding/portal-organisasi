@@ -18,5 +18,5 @@ export async function withOrgContext<T>(
     await tx`SELECT set_config('app.current_organization_id', ${ctx.orgId ?? ''}, true)`;
     return fn(tx);
   });
-  return result as T;
+  return result;
 }

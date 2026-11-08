@@ -64,7 +64,7 @@ afterAll(async () => {
 describe('HTTP E2E — Forged X-Active-Org header', () => {
   let cookieA: string;
   let orgY: string;
-  const server = () => app.getHttpServer() as http.Server;
+  const server = () => app.getHttpServer() as unknown as http.Server;
 
   it('setup: register users, login A, create org Y for B', async () => {
     const regA = await request(server())

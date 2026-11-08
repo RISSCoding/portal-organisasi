@@ -78,7 +78,7 @@ describe('HTTP E2E — Comment CRUD', () => {
   let taskId: string;
   let commentIdOwner: string;
   let commentIdMember: string;
-  const server = () => app.getHttpServer() as http.Server;
+  const server = () => app.getHttpServer() as unknown as http.Server;
 
   it('setup: register users, create orgs, add member, seed workspace, project, task', async () => {
     await request(server())

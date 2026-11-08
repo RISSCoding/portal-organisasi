@@ -47,7 +47,7 @@ export class TenantMiddleware implements NestMiddleware {
 
     const orgId = req.activeOrgId;
     if (orgId) {
-      const rows = await withOrgContext(
+      const rows = (await withOrgContext(
         this.sql,
         {
           userId: session.userId,
@@ -61,7 +61,7 @@ export class TenantMiddleware implements NestMiddleware {
             LIMIT 1
           `;
         },
-      );
+      )) as { role: OrgRole }[];
 
       const membership = rows[0];
       if (!membership) {

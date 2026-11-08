@@ -77,7 +77,7 @@ describe('HTTP E2E — Notification API', () => {
   let userBId: string;
   let notifAId: string;
   let notifBId: string;
-  const server = () => app.getHttpServer() as http.Server;
+  const server = () => app.getHttpServer() as unknown as http.Server;
 
   it('setup: register users, create orgs, seed notifications', async () => {
     await request(server())
