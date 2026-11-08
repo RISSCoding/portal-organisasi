@@ -1,0 +1,11 @@
+node_modules
+dist
+.next
+coverage
+bun.lockb
+*.md
+.env
+.env.*
+test-results/
+playwright-report/
+e2e/

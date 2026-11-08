@@ -1,0 +1,36 @@
+{
+  "name": "portal-organisasi",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \"bun run --filter='@portal/api' dev\" \"bun run --filter='@portal/web' dev\"",
+    "build": "bun run --filter='@portal/*' build",
+    "typecheck": "bunx tsc --noEmit -p tsconfig.json",
+    "lint": "bunx eslint .",
+    "format": "bunx prettier --write .",
+    "format:check": "bunx prettier --check .",
+    "test:unit": "bun test packages/auth && bun test packages/shared",
+    "test:rls": "bun test packages/db/src/__tests__/rls",
+    "test:integration": "bun test apps/api/src/__tests__",
+    "test:e2e": "npx playwright test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@playwright/test": "^1.65.0",
+    "@types/bun": "^1.1.10",
+    "concurrently": "^9.0.1",
+    "eslint": "^9.13.0",
+    "postgres": "^4.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.10.0"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
+  }
+}

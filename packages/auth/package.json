@@ -1,0 +1,15 @@
+{
+  "name": "@portal/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@portal/shared": "workspace:*"
+  },
+  "scripts": {
+    "build": "echo 'no build needed (Bun runs .ts directly)'"
+  }
+}
