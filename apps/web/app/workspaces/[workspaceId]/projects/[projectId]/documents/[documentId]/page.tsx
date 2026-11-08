@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import RichTextEditor from '@/app/components/RichTextEditor';
 
 interface Document {
   id: string;
@@ -113,18 +114,9 @@ export default function DocumentDetailPage() {
             required
             style={{ padding: '0.5rem', fontSize: '1.5rem', width: '100%', marginBottom: '1rem' }}
           />
-          <textarea
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            required
-            rows={10}
-            style={{
-              padding: '0.5rem',
-              width: '100%',
-              fontFamily: 'monospace',
-              marginBottom: '1rem',
-            }}
-          />
+          <div style={{ marginBottom: '1rem' }}>
+            <RichTextEditor content={editContent} onChange={setEditContent} />
+          </div>
           <button
             type="submit"
             style={{
@@ -155,17 +147,15 @@ export default function DocumentDetailPage() {
             </button>
           </div>
           <div
+            dangerouslySetInnerHTML={{ __html: doc.content }}
             style={{
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'monospace',
-              background: '#f9f9f9',
               padding: '1rem',
+              border: '1px solid #ddd',
               borderRadius: '4px',
               marginTop: '1rem',
+              minHeight: '200px',
             }}
-          >
-            {doc.content}
-          </div>
+          />
         </div>
       )}
 
