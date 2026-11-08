@@ -20,6 +20,8 @@ import { HrController } from './hr/hr.controller';
 import { HrService } from './hr/hr.service';
 import { SearchController } from './search/search.controller';
 import { SearchService } from './search/search.service';
+import { FinanceController } from './finance/finance.controller';
+import { FinanceService } from './finance/finance.service';
 import { MemberController } from './members/member.controller';
 import { TaskController } from './tasks/task.controller';
 import { TaskService } from './tasks/task.service';
@@ -44,6 +46,7 @@ import { ApprovalService } from './approvals/approval.service';
     AttachmentController,
     HrController,
     SearchController,
+    FinanceController,
     MemberController,
     TaskController,
     CommentController,
@@ -61,6 +64,7 @@ import { ApprovalService } from './approvals/approval.service';
     AttachmentService,
     HrService,
     SearchService,
+    FinanceService,
     TaskService,
     CommentService,
     DocumentService,
