@@ -27,3 +27,25 @@ Testing
     bun test for unit + RLS integration (Testcontainers).
 
     Every tenant-scoped endpoint ships with a cross-tenant test returning 403/404.
+
+## File Upload Flow (S3/MinIO)
+
+Aplikasi ini menggunakan *Presigned URL* untuk menangani unggahan file, sehingga file tidak melewati server API (menghemat *bandwidth* dan memori API).
+
+### Alur Upload
+1. Klien memanggil `POST /api/attachments/upload-url` dengan `fileName`, `mimeType`, `targetId`, dan `targetType`.
+2. API memverifikasi hak akses (RBAC) dan menghasilkan `storageKey` dengan format: `<organization_id>/<targetType>/<targetId>/<uuid>.<ext>`.
+3. API menggunakan AWS SDK untuk menghasilkan *Presigned PUT URL* (berlaku 1 jam) dan mengembalikannya ke klien.
+4. Klien mengunggah file secara langsung ke URL tersebut (MinIO/S3).
+5. Klien memanggil `POST /api/attachments/confirm` dengan `storageKey` dan metadata file.
+6. API menyimpan metadata tersebut ke tabel `attachments` (yang dilindungi oleh RLS).
+
+### Alur Download
+1. Klien memanggil `GET /api/attachments/:id/download`.
+2. API memverifikasi hak akses dan mencari `storage_key` di database (RLS memastikan user hanya bisa melihat attachment di organisasinya sendiri).
+3. API menghasilkan *Presigned GET URL* (berlaku 1 jam) dan mengembalikannya ke klien.
+4. Klien mengunduh file langsung dari MinIO/S3.
+
+### Keamanan
+- Isolasi *tenant* (RLS) diterapkan di database, sehingga user dari Org A tidak akan pernah bisa mendapatkan *download URL* untuk file milik Org B (akan mengembalikan `404 Not Found`).
+- `storageKey` selalu diawali dengan `organization_id` untuk memastikan isolasi di level *storage*.

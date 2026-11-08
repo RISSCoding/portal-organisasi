@@ -14,6 +14,8 @@ import { ProjectController } from './projects/project.controller';
 import { ProjectService } from './projects/project.service';
 import { InvitationController } from './members/invitation.controller';
 import { InvitationService } from './members/invitation.service';
+import { AttachmentController } from './attachments/attachment.controller';
+import { AttachmentService } from './attachments/attachment.service';
 import { MemberController } from './members/member.controller';
 import { TaskController } from './tasks/task.controller';
 import { TaskService } from './tasks/task.service';
@@ -35,6 +37,7 @@ import { ApprovalService } from './approvals/approval.service';
     WorkspaceController,
     ProjectController,
     InvitationController,
+    AttachmentController,
     MemberController,
     TaskController,
     CommentController,
@@ -49,6 +52,7 @@ import { ApprovalService } from './approvals/approval.service';
     WorkspaceService,
     ProjectService,
     InvitationService,
+    AttachmentService,
     TaskService,
     CommentService,
     DocumentService,
