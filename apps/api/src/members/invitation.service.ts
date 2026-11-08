@@ -7,10 +7,19 @@ import { can } from '@portal/auth';
 import type { OrgRole } from '@portal/shared';
 import { AppError, ERROR_CODES } from '@portal/shared';
 import { DB_CONNECTION } from '../db/db.module';
+import { Queue } from 'bullmq';
+import IORedis from 'ioredis';
 
 @Injectable()
 export class InvitationService {
-  constructor(@Inject(DB_CONNECTION) private readonly sql: postgres.Sql) {}
+  private emailQueue: Queue;
+
+  constructor(@Inject(DB_CONNECTION) private readonly sql: postgres.Sql) {
+    const connection = new IORedis(process.env.REDIS_URL || 'redis://localhost:6379', {
+      maxRetriesPerRequest: null,
+    });
+    this.emailQueue = new Queue('email', { connection });
+  }
 
   async invite(
     userId: string,
@@ -34,6 +43,19 @@ export class InvitationService {
           INSERT INTO invitations (organization_id, email, role, token_hash, invited_by_user_id, expires_at)
           VALUES (${orgId}, ${email}, ${inviteRole}, ${tokenHash}, ${userId}, ${expiresAt})
         `;
+
+        // Ambil nama organisasi
+        const [org] = await tx<
+          { name: string }[]
+        >`SELECT name FROM organizations WHERE id = ${orgId}`;
+
+        // Masukkan job ke queue
+        await this.emailQueue.add('send-invitation', {
+          to: email,
+          orgName: org!.name,
+          token: token,
+        });
+
         return { ok: true, token };
       } catch (e: unknown) {
         if (typeof e === 'object' && e !== null && 'code' in e && e.code === '23505') {
