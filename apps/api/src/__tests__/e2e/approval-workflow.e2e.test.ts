@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
-import type http from 'node:http';
+import type { App } from 'supertest/types';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import postgres from 'postgres';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -77,7 +77,7 @@ describe('HTTP E2E — Approval Workflow', () => {
   let orgId: string;
   let orgOtherId: string;
   let requestId: string;
-  const server = (): http.Server => app.getHttpServer() as http.Server;
+  const server = (): App => app.getHttpServer() as App;
 
   it('setup: register users, create orgs, add member', async () => {
     await request(server())
