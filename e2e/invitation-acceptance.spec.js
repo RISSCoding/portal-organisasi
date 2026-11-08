@@ -27,6 +27,10 @@ test.afterAll(async () => {
 });
 
 test('invite acceptance UI flow', async ({ page, request }) => {
+  // Debug: Listen to console and errors
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+
   // 1. Setup via API + Admin SQL
   await request.post(`${API_VIA_WEB}/api/auth/register`, { data: { email: ownerEmail, password, name: 'Owner' } });
   await request.post(`${API_VIA_WEB}/api/auth/register`, { data: { email: inviteeEmail, password, name: 'Invitee' } });
@@ -61,7 +65,13 @@ test('invite acceptance UI flow', async ({ page, request }) => {
   await page.goto(`/invitations/accept?token=${rawToken}`);
 
   // 4. Verify Success (Tambah timeout lebih lama)
-  await expect(page.getByText('Undangan berhasil diterima!')).toBeVisible({ timeout: 15000 });
+  try {
+    await expect(page.getByText('Undangan berhasil diterima!')).toBeVisible({ timeout: 15000 });
+  } catch (e) {
+    console.log('=== PAGE CONTENT ON FAILURE ===');
+    console.log(await page.content());
+    throw e;
+  }
   
   // 5. Verify redirect to Dashboard and Org is visible
   await expect(page).toHaveURL(/\/dashboard$/, { timeout: 5000 });
