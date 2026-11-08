@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 'use client';
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-function AcceptInvitationContent() {
+export default function AcceptInvitationPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+
     if (!token) {
       setStatus('error');
       setMessage('Token undangan tidak ditemukan di URL.');
@@ -41,7 +42,6 @@ function AcceptInvitationContent() {
         setStatus('success');
         setMessage('Undangan berhasil diterima! Mengalihkan ke Dashboard...');
 
-        // Arahkan ke dashboard setelah 3 detik
         setTimeout(() => {
           router.push('/dashboard');
         }, 3000);
@@ -52,7 +52,7 @@ function AcceptInvitationContent() {
     };
 
     void acceptInvite();
-  }, [token, router]);
+  }, [router]);
 
   return (
     <div style={{ maxWidth: '500px', margin: '4rem auto', textAlign: 'center' }}>
@@ -87,13 +87,5 @@ function AcceptInvitationContent() {
         </div>
       )}
     </div>
-  );
-}
-
-export default function AcceptInvitationPage() {
-  return (
-    <Suspense fallback={<p>Loading...</p>}>
-      <AcceptInvitationContent />
-    </Suspense>
   );
 }
