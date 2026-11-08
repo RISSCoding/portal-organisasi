@@ -9,7 +9,7 @@ import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers
 import postgres from 'postgres';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import type http from 'node:http';
+
 import { AppModule } from '../../app.module';
 import { GlobalExceptionFilter } from '../../common/filters/global-exception.filter';
 
@@ -76,7 +76,7 @@ describe('HTTP E2E — Project CRUD', () => {
   let orgId: string;
   let orgOtherId: string;
   let workspaceId: string;
-  const server = () => app.getHttpServer() as unknown as http.Server;
+  const server = () => app.getHttpServer();
 
   it('setup: register users, create orgs, add member, seed workspace', async () => {
     await request(server())

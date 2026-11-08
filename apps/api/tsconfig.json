@@ -5,7 +5,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "types": ["bun", "node"]
   },
   "include": ["src/**/*.ts"]
 }

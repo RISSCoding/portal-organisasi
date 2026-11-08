@@ -9,7 +9,7 @@ import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers
 import postgres from 'postgres';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import type http from 'node:http';
+
 import { AppModule } from '../../app.module';
 import { GlobalExceptionFilter } from '../../common/filters/global-exception.filter';
 
@@ -77,7 +77,7 @@ describe('HTTP E2E — Notification API', () => {
   let userBId: string;
   let notifAId: string;
   let notifBId: string;
-  const server = () => app.getHttpServer() as unknown as http.Server;
+  const server = () => app.getHttpServer();
 
   it('setup: register users, create orgs, seed notifications', async () => {
     await request(server())

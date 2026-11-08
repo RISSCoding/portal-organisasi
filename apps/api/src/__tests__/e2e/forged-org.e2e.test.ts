@@ -9,7 +9,7 @@ import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers
 import postgres from 'postgres';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import type http from 'node:http';
+
 import { AppModule } from '../../app.module';
 import { GlobalExceptionFilter } from '../../common/filters/global-exception.filter';
 
@@ -64,7 +64,7 @@ afterAll(async () => {
 describe('HTTP E2E — Forged X-Active-Org header', () => {
   let cookieA: string;
   let orgY: string;
-  const server = () => app.getHttpServer() as unknown as http.Server;
+  const server = () => app.getHttpServer();
 
   it('setup: register users, login A, create org Y for B', async () => {
     const regA = await request(server())
