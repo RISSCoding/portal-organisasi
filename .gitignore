@@ -17,8 +17,3 @@ coverage/
 test-results/
 playwright-report/
 playwright/.cache/
-
-node_modules/
-.next/
-test-results/
-dist/

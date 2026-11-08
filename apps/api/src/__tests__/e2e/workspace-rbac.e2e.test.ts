@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
+import type http from 'node:http';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import postgres from 'postgres';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -77,7 +78,7 @@ describe('HTTP E2E — Workspace RBAC', () => {
   let cookieOwner: string;
   let cookieMember: string;
   let orgId: string;
-  const server = () => app.getHttpServer();
+  const server = (): http.Server => app.getHttpServer() as http.Server;
 
   it('setup: register owner & member, create org, add member', async () => {
     await request(server())

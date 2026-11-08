@@ -44,6 +44,16 @@ jobs:
         env:
           TESTCONTAINERS_RYUK_DISABLED: true
 
+  rls-coverage:
+    runs-on: ubuntu-latest
+    needs: [test-rls]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with: { bun-version: 1.4.0 }
+      - run: bun install --frozen-lockfile
+      - run: bun run --filter '@portal/db' check:rls-coverage
+
   test-integration:
     runs-on: ubuntu-latest
     steps:
@@ -76,19 +86,16 @@ jobs:
         with: { bun-version: 1.4.0 }
       - run: bun install --frozen-lockfile
 
-      # Jalankan migrasi database untuk E2E
       - run: bun run --filter '@portal/db' migrate
         env:
           DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/portal
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/portal
 
-      # Install Playwright browser
       - run: bunx playwright install --with-deps chromium
 
-      # Jalankan E2E Test
       - run: bun run test:e2e
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/portal
+          # PENTING: Gunakan portal_app agar RLS benar-benar diuji (bukan superuser bypass)
+          DATABASE_URL: postgres://portal_app:app@localhost:5432/portal
           DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/portal
           API_URL: http://localhost:3000
           WEB_URL: http://localhost:3001

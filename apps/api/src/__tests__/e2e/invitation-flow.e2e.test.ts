@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
+import type http from 'node:http';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import postgres from 'postgres';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -78,7 +79,7 @@ describe('HTTP E2E — Invitation Flow', () => {
   let cookieInvitee: string;
   let orgId: string;
   let inviteToken: string;
-  const server = () => app.getHttpServer();
+  const server = (): http.Server => app.getHttpServer() as http.Server;
 
   it('setup: register owner & invitee, create org', async () => {
     await request(server())

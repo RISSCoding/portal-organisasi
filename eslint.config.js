@@ -35,15 +35,4 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
     },
   },
-  {
-    // Pengecualian aturan untuk file E2E/Test (boleh menggunakan any untuk mocking)
-    files: ['apps/api/src/__tests__/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-    },
-  },
 );

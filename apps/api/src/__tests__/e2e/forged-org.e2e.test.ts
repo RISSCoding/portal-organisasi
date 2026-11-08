@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import request from 'supertest';
+import type http from 'node:http';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import postgres from 'postgres';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -64,7 +65,7 @@ afterAll(async () => {
 describe('HTTP E2E — Forged X-Active-Org header', () => {
   let cookieA: string;
   let orgY: string;
-  const server = () => app.getHttpServer();
+  const server = (): http.Server => app.getHttpServer() as http.Server;
 
   it('setup: register users, login A, create org Y for B', async () => {
     const regA = await request(server())
