@@ -17,12 +17,18 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: 'bun run dev',
-    url: 'http://localhost:3001',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-    stdout: 'ignore',
-    stderr: 'pipe',
-  },
+  webServer: [
+    {
+      command: 'bun run --filter "@portal/api" start',
+      url: 'http://localhost:3000/api/docs',
+      timeout: 120_000,
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: 'bun run --filter "@portal/web" build && bun run --filter "@portal/web" start',
+      url: 'http://localhost:3001',
+      timeout: 180_000,
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });
