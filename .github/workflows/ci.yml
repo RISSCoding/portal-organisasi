@@ -56,6 +56,11 @@ jobs:
 
   test-integration:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -64,6 +69,7 @@ jobs:
       - run: bun run test:integration
         env:
           TESTCONTAINERS_RYUK_DISABLED: true
+          REDIS_URL: redis://localhost:6379
 
   test-e2e:
     runs-on: ubuntu-latest
@@ -94,8 +100,8 @@ jobs:
 
       - run: bun run test:e2e
         env:
-          # PENTING: Gunakan portal_app agar RLS benar-benar diuji (bukan superuser bypass)
           DATABASE_URL: postgres://portal_app:app@localhost:5432/portal
           DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5432/portal
+          REDIS_URL: redis://localhost:6379
           API_URL: http://localhost:3000
           WEB_URL: http://localhost:3001
