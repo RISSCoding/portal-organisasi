@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, Save, Building2 } from 'lucide-react';
 
 interface OrgSettings {
   id: string;
@@ -47,11 +48,7 @@ export default function OrgSettingsPage() {
     setError('');
     setSuccess(false);
 
-    // Kirim undefined (bukan '') untuk field opsional agar @IsUrl tidak gagal
-    const payload: Record<string, unknown> = {
-      name,
-      primaryColor,
-    };
+    const payload: Record<string, unknown> = { name, primaryColor };
     if (description) payload.description = description;
     if (logoUrl) payload.logoUrl = logoUrl;
 
@@ -70,101 +67,103 @@ export default function OrgSettingsPage() {
     localStorage.setItem('portal_primary_color', primaryColor);
     setSuccess(true);
     void fetchOrg();
+    // Optional: reload to apply primary color globally
+    // window.location.reload();
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (!org) return <p>Organisasi tidak ditemukan.</p>;
+  if (loading) return <div className="p-8 text-center text-gray-500">Loading...</div>;
+  if (!org) return <div className="p-8 text-center text-gray-500">Organisasi tidak ditemukan.</div>;
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <Link href="/dashboard" style={{ color: 'blue' }}>
-          &larr; Back to Dashboard
-        </Link>
-      </div>
-      <h1>Pengaturan Organisasi</h1>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>Pengaturan berhasil disimpan!</p>}
-
-      <form
-        onSubmit={(e) => {
-          void handleSave(e);
-        }}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          border: '1px solid #ddd',
-          padding: '1rem',
-          borderRadius: '4px',
-        }}
-      >
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>
-            Nama Organisasi
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{ padding: '0.5rem', width: '100%' }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>
-            Deskripsi
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            style={{ padding: '0.5rem', width: '100%' }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>
-            URL Logo
-          </label>
-          <input
-            type="url"
-            value={logoUrl}
-            onChange={(e) => setLogoUrl(e.target.value)}
-            placeholder="https://..."
-            style={{ padding: '0.5rem', width: '100%' }}
-          />
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 'bold' }}>
-            Warna Utama
-          </label>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <input
-              type="color"
-              value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.target.value)}
-              style={{ width: '50px', height: '40px', cursor: 'pointer' }}
-            />
-            <code>{primaryColor}</code>
-          </div>
-        </div>
-        <button
-          type="submit"
-          style={{
-            padding: '0.5rem 1rem',
-            background: primaryColor,
-            color: '#fff',
-            alignSelf: 'flex-start',
-            marginTop: '1rem',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/dashboard"
+          className="p-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition"
         >
-          Simpan Pengaturan
-        </button>
-      </form>
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        </Link>
+        <h1 className="text-2xl font-bold text-gray-900">Pengaturan Organisasi</h1>
+      </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{error}</div>
+      )}
+      {success && (
+        <div className="p-4 bg-green-50 text-green-700 rounded-lg border border-green-200">
+          Pengaturan berhasil disimpan!
+        </div>
+      )}
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <form
+          onSubmit={(e) => {
+            void handleSave(e);
+          }}
+          className="space-y-6"
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Nama Organisasi</label>
+            <div className="relative">
+              <Building2 className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+              placeholder="Deskripsi singkat organisasi..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">URL Logo</label>
+            <input
+              type="url"
+              value={logoUrl}
+              onChange={(e) => setLogoUrl(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Warna Utama</label>
+            <div className="flex items-center gap-4">
+              <input
+                type="color"
+                value={primaryColor}
+                onChange={(e) => setPrimaryColor(e.target.value)}
+                className="w-12 h-10 p-0 border border-gray-300 rounded cursor-pointer"
+              />
+              <code className="text-sm bg-gray-100 px-3 py-1.5 rounded-md text-gray-700">
+                {primaryColor}
+              </code>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-100">
+            <button
+              type="submit"
+              className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition font-medium"
+            >
+              <Save className="w-4 h-4" />
+              Simpan Pengaturan
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 'use client';
 import { useEffect, useState } from 'react';
+import './globals.css';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [primaryColor, setPrimaryColor] = useState('#000000');
@@ -12,13 +13,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en">
-      <body style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem' }}>
+      <body className="min-h-screen font-sans antialiased">
         <style>{`
           :root {
             --primary-color: ${primaryColor};
-          }
-          .btn-primary {
-            background-color: var(--primary-color);
           }
         `}</style>
         {children}

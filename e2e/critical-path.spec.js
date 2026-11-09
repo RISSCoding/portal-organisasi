@@ -52,7 +52,7 @@ test('critical path: login → org switch → workspace → project → task', a
 
   // Dashboard: Pastikan org ada dan tunggu auto-switch selesai
   await expect(page.getByText(orgName)).toBeVisible();
-  await expect(page.getByText('[Active]')).toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
   // Navigate to Workspaces
   await page.getByRole('link', { name: 'Workspaces' }).click();

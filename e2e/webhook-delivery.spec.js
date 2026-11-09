@@ -43,7 +43,7 @@ test('webhook delivery fires on task.created event', async ({ page, request }) =
   await expect(page).toHaveURL(/\/dashboard$/);
 
   await expect(page.getByText(orgName)).toBeVisible();
-  await expect(page.getByText('[Active]')).toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
   // 3. Create Webhook via UI
   await page.goto('/webhooks');

@@ -43,7 +43,7 @@ test('api key authentication works and respects isolation', async ({ page, reque
   await expect(page).toHaveURL(/\/dashboard$/);
 
   await expect(page.getByText(orgName)).toBeVisible();
-  await expect(page.getByText('[Active]')).toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
   // 3. Create API Key via UI
   await page.goto('/api-keys');

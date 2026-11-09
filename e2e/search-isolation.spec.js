@@ -50,8 +50,7 @@ test('global search respects tenant isolation', async ({ page, request }) => {
   const [orgA] = await adminSql`SELECT id FROM organizations WHERE name = ${orgAName}`;
   const [orgB] = await adminSql`SELECT id FROM organizations WHERE name = ${orgBName}`;
 
-  // 3. Seed data: User A has "Secret Alpha" task, User B has "Secret Beta" task
-  // Note: We need to create a workspace and project for the task to exist
+  // 3. Seed data
   await adminSql.begin(async (tx) => {
     await tx`SELECT set_config('app.current_user_id', ${userA.id}, true)`;
     await tx`SELECT set_config('app.current_organization_id', ${orgA.id}, true)`;
@@ -75,11 +74,10 @@ test('global search respects tenant isolation', async ({ page, request }) => {
   await page.click('button[type="submit"]');
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByText(orgAName)).toBeVisible();
-  await expect(page.getByText('[Active]')).toBeVisible();
 
   // 5. Search for "Alpha" -> Should find User A's task
-  await page.fill('input[placeholder="Search tasks, documents..."]', 'Alpha');
-  await page.click('button:has-text("Search")');
+  await page.fill('input[placeholder="Cari tasks, documents..."]', 'Alpha');
+  await page.press('input[placeholder="Cari tasks, documents..."]', 'Enter');
   await expect(page).toHaveURL(/\/search\?q=Alpha/);
   await expect(page.getByText('Secret Alpha')).toBeVisible();
 

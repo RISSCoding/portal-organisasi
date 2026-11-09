@@ -46,7 +46,7 @@ test('finance flow: create budget, submit expense, approve', async ({ page, requ
 
   // Tunggu auto-switch
   await expect(page.getByText(orgName)).toBeVisible();
-  await expect(page.getByText('[Active]')).toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
   // 3. Go to Finance
   await page.goto('/finance');

@@ -2,6 +2,8 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { LogIn } from 'lucide-react';
 
 export default function Login() {
   const router = useRouter();
@@ -29,45 +31,65 @@ export default function Login() {
   };
 
   return (
-    <div style={{ maxWidth: '400px' }}>
-      <h1>Login</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {/* ESLint fix: wrap handleLogin in an inline arrow function that returns void */}
-      <form
-        onSubmit={(e) => {
-          void handleLogin(e);
-        }}
-        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-      >
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ padding: '0.5rem' }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ padding: '0.5rem' }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: '0.5rem',
-            background: '#000',
-            color: '#fff',
-            border: 'none',
-            cursor: 'pointer',
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-4 text-primary-foreground">
+            <LogIn className="w-6 h-6" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
+          <p className="text-gray-500 text-sm mt-1">Sign in to your Portal Organisasi account</p>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+            {error}
+          </div>
+        )}
+
+        <form
+          onSubmit={(e) => {
+            void handleLogin(e);
           }}
+          className="space-y-4"
         >
-          Login
-        </button>
-      </form>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              placeholder="••••••••"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition"
+          >
+            Sign In
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Don't have an account?{' '}
+          <Link href="/register" className="font-medium text-primary hover:underline">
+            Register
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

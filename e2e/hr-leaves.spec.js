@@ -44,7 +44,7 @@ test('HR leave request flow', async ({ page, request }) => {
 
   // TUNGGU AUTO-SWITCH SELESAI
   await expect(page.getByText(orgName)).toBeVisible();
-  await expect(page.getByText('[Active]')).toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
   // 3. Go to HR Leaves
   await page.goto('/hr/leaves');

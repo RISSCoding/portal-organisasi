@@ -44,7 +44,7 @@ test('user with matching domain auto-joins organization', async ({ page, request
   await page.click('button[type="submit"]');
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.getByText(orgName)).toBeVisible();
-  await expect(page.getByText('[Active]')).toBeVisible();
+  await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
   // 3. Add Domain via UI
   await page.goto('/domains');
