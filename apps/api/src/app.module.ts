@@ -26,6 +26,8 @@ import { ApiKeyController } from './api-keys/api-key.controller';
 import { ApiKeyService } from './api-keys/api-key.service';
 import { WebhookController } from './webhooks/webhook.controller';
 import { WebhookService } from './webhooks/webhook.service';
+import { DomainController } from './domains/domain.controller';
+import { DomainService } from './domains/domain.service';
 import { MemberController } from './members/member.controller';
 import { TaskController } from './tasks/task.controller';
 import { TaskService } from './tasks/task.service';
@@ -53,6 +55,7 @@ import { ApprovalService } from './approvals/approval.service';
     FinanceController,
     ApiKeyController,
     WebhookController,
+    DomainController,
     MemberController,
     TaskController,
     CommentController,
@@ -73,6 +76,7 @@ import { ApprovalService } from './approvals/approval.service';
     FinanceService,
     ApiKeyService,
     WebhookService,
+    DomainService,
     TaskService,
     CommentService,
     DocumentService,

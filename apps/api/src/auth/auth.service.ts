@@ -20,6 +20,10 @@ export class AuthService {
       const [user] = await this.sql<{ id: string }[]>`
         INSERT INTO users (email, password_hash, name) VALUES (${email}, ${hash}, ${name}) RETURNING id
       `;
+
+      // Auto-join via SECURITY DEFINER function (bypasses RLS)
+      await this.sql`SELECT app.auto_join_organizations(${user!.id}, ${email})`;
+
       return user!;
     } catch (e: unknown) {
       if (typeof e === 'object' && e !== null && 'code' in e && e.code === '23505') {
