@@ -8,6 +8,7 @@ import { SessionService } from './session.service';
 import type { SessionRecord } from './session.service';
 import { DB_CONNECTION } from '../db/db.module';
 import type { OrgRole } from '@portal/shared';
+import { ApiKeyService } from '../api-keys/api-key.service';
 
 export interface AuthRequest extends Request {
   session?: SessionRecord;
@@ -19,18 +20,31 @@ export interface AuthRequest extends Request {
 export class TenantMiddleware implements NestMiddleware {
   constructor(
     private readonly sessions: SessionService,
+    private readonly apiKeys: ApiKeyService,
     @Inject(DB_CONNECTION) private readonly sql: postgres.Sql,
   ) {}
 
   async use(req: AuthRequest, _res: Response, next: NextFunction) {
-    const token = req.cookies?.['portal_session'] as string | undefined;
-    if (!token) return next();
+    let session: SessionRecord | null = null;
 
-    let session = await this.sessions.validate(token);
+    // 1. Cek Session Cookie (Web UI)
+    const token = req.cookies?.['portal_session'] as string | undefined;
+    if (token) {
+      session = await this.sessions.validate(token);
+      if (session) {
+        session = await this.sessions.revalidateActiveOrg(session);
+      }
+    }
+
+    // 2. Cek Authorization Header (API Keys)
+    if (!session && req.headers.authorization?.startsWith('Bearer ')) {
+      const apiKey = req.headers.authorization.substring(7);
+      session = await this.apiKeys.validateKey(apiKey);
+    }
+
     if (!session) return next();
 
-    session = await this.sessions.revalidateActiveOrg(session);
-
+    // 3. Proses X-Active-Org Header (untuk memilih org aktif)
     const headerOrg =
       typeof req.header('x-active-org') === 'string' ? req.header('x-active-org')! : null;
     if (headerOrg && headerOrg !== session.activeOrganizationId) {

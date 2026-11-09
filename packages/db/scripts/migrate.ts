@@ -10,6 +10,7 @@ const sql = postgres(adminUrl, { max: 1 });
 async function migrate() {
   console.log('Menjalankan migrasi database...');
 
+  // Buat role portal_app jika belum ada
   await sql.unsafe(`
     DO $$
     BEGIN
@@ -30,13 +31,10 @@ async function migrate() {
     const query = readFileSync(join(migrationsDir, file), 'utf8');
     try {
       await sql.unsafe(query);
-    } catch (e) {
-      if (
-        typeof e === 'object' &&
-        e !== null &&
-        'code' in e &&
-        (e.code === '42P07' || e.code === '42710')
-      ) {
+    } catch (e: unknown) {
+      // Tangkap semua error "already exists" agar script idempotent
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (errorMessage.includes('already exists')) {
         console.log(`  (skipped: object already exists)`);
       } else {
         throw e;

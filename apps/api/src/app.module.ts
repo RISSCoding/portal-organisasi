@@ -22,6 +22,8 @@ import { SearchController } from './search/search.controller';
 import { SearchService } from './search/search.service';
 import { FinanceController } from './finance/finance.controller';
 import { FinanceService } from './finance/finance.service';
+import { ApiKeyController } from './api-keys/api-key.controller';
+import { ApiKeyService } from './api-keys/api-key.service';
 import { MemberController } from './members/member.controller';
 import { TaskController } from './tasks/task.controller';
 import { TaskService } from './tasks/task.service';
@@ -47,6 +49,7 @@ import { ApprovalService } from './approvals/approval.service';
     HrController,
     SearchController,
     FinanceController,
+    ApiKeyController,
     MemberController,
     TaskController,
     CommentController,
@@ -65,6 +68,7 @@ import { ApprovalService } from './approvals/approval.service';
     HrService,
     SearchService,
     FinanceService,
+    ApiKeyService,
     TaskService,
     CommentService,
     DocumentService,
