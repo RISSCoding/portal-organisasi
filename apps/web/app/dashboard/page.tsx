@@ -55,6 +55,14 @@ export default function Dashboard() {
     }
   };
 
+  const btnStyle = {
+    padding: '0.5rem 1rem',
+    background: '#000',
+    color: '#fff',
+    textDecoration: 'none',
+    borderRadius: '4px',
+  };
+
   return (
     <div>
       <h1>Dashboard</h1>
@@ -84,54 +92,33 @@ export default function Dashboard() {
         </button>
       </form>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-        <Link
-          href="/workspaces"
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '4px',
-          }}
-        >
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <Link href="/workspaces" style={btnStyle}>
           Workspaces
         </Link>
-        <Link
-          href="/hr/leaves"
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '4px',
-          }}
-        >
+        <Link href="/hr/leaves" style={btnStyle}>
           HR (Cuti)
         </Link>
-        <Link
-          href="/approvals"
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '4px',
-          }}
-        >
+        <Link href="/finance" style={btnStyle}>
+          Keuangan
+        </Link>
+        <Link href="/approvals" style={btnStyle}>
           Approvals
         </Link>
-        <Link
-          href="/notifications"
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '4px',
-          }}
-        >
+        <Link href="/notifications" style={btnStyle}>
           Notifications
+        </Link>
+        <Link href="/api-keys" style={btnStyle}>
+          API Keys
+        </Link>
+        <Link href="/webhooks" style={btnStyle}>
+          Webhooks
+        </Link>
+        <Link href="/domains" style={btnStyle}>
+          Domains
+        </Link>
+        <Link href="/settings/organization" style={btnStyle}>
+          Pengaturan
         </Link>
       </div>
 

@@ -26,15 +26,12 @@ export class AttachmentService {
     targetType: 'task' | 'document',
   ) {
     if (!can(role, 'task', 'update')) {
-      // Assume if can update task, can attach
       throw new AppError(ERROR_CODES.FORBIDDEN, 'Cannot upload attachments', 403);
     }
 
-    // 1. Tentukan storage key dengan prefix organization_id untuk isolasi
     const fileExtension = fileName.split('.').pop() || 'bin';
     const storageKey = `${orgId}/${targetType}/${targetId}/${randomUUID()}.${fileExtension}`;
 
-    // 2. Generate Presigned URL untuk PUT
     const command = new PutObjectCommand({
       Bucket: S3_BUCKET,
       Key: storageKey,
@@ -57,27 +54,23 @@ export class AttachmentService {
     targetId: string,
     targetType: 'task' | 'document',
   ) {
+    // SECURITY: Validate storage key prefix to prevent cross-tenant attachment injection
+    const expectedPrefix = `${orgId}/${targetType}/${targetId}/`;
+    if (!storageKey.startsWith(expectedPrefix)) {
+      throw new AppError(ERROR_CODES.FORBIDDEN, 'Invalid storage key', 403);
+    }
+
     return withOrgContext(this.sql, { userId, userEmail, orgId }, async (tx) => {
       const [attachment] = await tx<{ id: string }[]>`
         INSERT INTO attachments (
-          organization_id, 
-          task_id, 
-          document_id, 
-          uploaded_by_user_id, 
-          file_name, 
-          mime_type, 
-          file_size, 
-          storage_key
+          organization_id, task_id, document_id, uploaded_by_user_id,
+          file_name, mime_type, file_size, storage_key
         )
         VALUES (
-          ${orgId}, 
-          ${targetType === 'task' ? targetId : null}, 
-          ${targetType === 'document' ? targetId : null}, 
-          ${userId}, 
-          ${fileName}, 
-          ${mimeType}, 
-          ${fileSize}, 
-          ${storageKey}
+          ${orgId},
+          ${targetType === 'task' ? targetId : null},
+          ${targetType === 'document' ? targetId : null},
+          ${userId}, ${fileName}, ${mimeType}, ${fileSize}, ${storageKey}
         )
         RETURNING id
       `;
@@ -100,16 +93,13 @@ export class AttachmentService {
       if (targetType === 'task') {
         return tx`
           SELECT id, file_name, mime_type, file_size, created_at
-          FROM attachments
-          WHERE organization_id = ${orgId} AND task_id = ${targetId}
-        `;
-      } else {
-        return tx`
-          SELECT id, file_name, mime_type, file_size, created_at
-          FROM attachments
-          WHERE organization_id = ${orgId} AND document_id = ${targetId}
+          FROM attachments WHERE organization_id = ${orgId} AND task_id = ${targetId}
         `;
       }
+      return tx`
+        SELECT id, file_name, mime_type, file_size, created_at
+        FROM attachments WHERE organization_id = ${orgId} AND document_id = ${targetId}
+      `;
     });
   }
 
@@ -130,10 +120,7 @@ export class AttachmentService {
       `;
       if (!attachment) throw new AppError(ERROR_CODES.NOT_FOUND, 'Attachment not found', 404);
 
-      const command = new GetObjectCommand({
-        Bucket: S3_BUCKET,
-        Key: attachment.storage_key,
-      });
+      const command = new GetObjectCommand({ Bucket: S3_BUCKET, Key: attachment.storage_key });
       const downloadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
       return { downloadUrl };
     });
