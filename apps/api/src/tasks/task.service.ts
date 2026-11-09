@@ -6,10 +6,14 @@ import { withOrgContext } from '@portal/db';
 import { can } from '@portal/auth';
 import { AppError, ERROR_CODES } from '@portal/shared';
 import type { OrgRole } from '@portal/shared';
+import { WebhookService } from '../webhooks/webhook.service';
 
 @Injectable()
 export class TaskService {
-  constructor(@Inject(DB_CONNECTION) private readonly sql: postgres.Sql) {}
+  constructor(
+    @Inject(DB_CONNECTION) private readonly sql: postgres.Sql,
+    private readonly webhooks: WebhookService,
+  ) {}
 
   async listByProject(
     userId: string,
@@ -43,14 +47,13 @@ export class TaskService {
     if (!can(role, 'task', 'create')) {
       throw new AppError(ERROR_CODES.FORBIDDEN, 'Cannot create task', 403);
     }
-    return withOrgContext(this.sql, { userId, userEmail, orgId }, async (tx) => {
-      // Validate project exists and is accessible
+    const task = await withOrgContext(this.sql, { userId, userEmail, orgId }, async (tx) => {
       const [proj] = await tx<
         { id: string }[]
       >`SELECT id FROM projects WHERE id = ${projectId} AND organization_id = ${orgId}`;
       if (!proj) throw new AppError(ERROR_CODES.NOT_FOUND, 'Project not found', 404);
 
-      const [task] = await tx<
+      const [createdTask] = await tx<
         { id: string; title: string; status: string; parent_task_id: string | null }[]
       >`
         INSERT INTO tasks (organization_id, project_id, title, parent_task_id, created_by_user_id)
@@ -60,10 +63,19 @@ export class TaskService {
 
       await tx`
         INSERT INTO audit_logs (organization_id, actor_user_id, action, resource_type, resource_id)
-        VALUES (${orgId}, ${userId}, 'task.create', 'task', ${task!.id})
+        VALUES (${orgId}, ${userId}, 'task.create', 'task', ${createdTask!.id})
       `;
-      return task!;
+      return createdTask!;
     });
+
+    // Dispatch webhook event (fire and forget)
+    void this.webhooks.dispatchEvent(orgId, userId, userEmail, 'task.created', {
+      taskId: task.id,
+      title: task.title,
+      createdBy: userId,
+    });
+
+    return task;
   }
 
   async update(
@@ -78,7 +90,6 @@ export class TaskService {
       throw new AppError(ERROR_CODES.FORBIDDEN, 'Cannot update task', 403);
     }
     return withOrgContext(this.sql, { userId, userEmail, orgId }, async (tx) => {
-      // RLS ensures we only update if it belongs to orgId
       const [task] = await tx<{ id: string; title: string; status: string; priority: string }[]>`
         UPDATE tasks
         SET

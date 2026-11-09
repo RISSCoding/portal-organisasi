@@ -24,6 +24,8 @@ import { FinanceController } from './finance/finance.controller';
 import { FinanceService } from './finance/finance.service';
 import { ApiKeyController } from './api-keys/api-key.controller';
 import { ApiKeyService } from './api-keys/api-key.service';
+import { WebhookController } from './webhooks/webhook.controller';
+import { WebhookService } from './webhooks/webhook.service';
 import { MemberController } from './members/member.controller';
 import { TaskController } from './tasks/task.controller';
 import { TaskService } from './tasks/task.service';
@@ -50,6 +52,7 @@ import { ApprovalService } from './approvals/approval.service';
     SearchController,
     FinanceController,
     ApiKeyController,
+    WebhookController,
     MemberController,
     TaskController,
     CommentController,
@@ -69,6 +72,7 @@ import { ApprovalService } from './approvals/approval.service';
     SearchService,
     FinanceService,
     ApiKeyService,
+    WebhookService,
     TaskService,
     CommentService,
     DocumentService,
