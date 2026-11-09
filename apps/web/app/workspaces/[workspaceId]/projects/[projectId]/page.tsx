@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, Plus, KanbanSquare } from 'lucide-react';
 
 interface Task {
   id: string;
@@ -21,16 +22,13 @@ export default function ProjectTasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [title, setTitle] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
 
   const fetchTasks = async () => {
     const res = await fetch(`/api/tasks/project/${projectId}`);
     if (res.status === 401) return router.push('/login');
     if (res.ok) {
-      const data = (await res.json()) as Task[];
-      setTasks(data);
+      setTasks((await res.json()) as Task[]);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -66,58 +64,59 @@ export default function ProjectTasksPage() {
     void fetchTasks();
   };
 
-  if (loading) return <p>Loading tasks...</p>;
-
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-        <Link href={`/workspaces/${workspaceId}`} style={{ color: 'blue' }}>
-          &larr; Back to Workspace
-        </Link>
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div className="flex items-center gap-4">
         <Link
-          href={`/workspaces/${workspaceId}/projects/${projectId}/documents`}
-          style={{ color: 'blue' }}
+          href={`/workspaces/${workspaceId}`}
+          className="p-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition"
         >
-          View Documents &rarr;
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        </Link>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-gray-900">Tasks</h1>
+        </div>
+        <Link
+          href={`/workspaces/${workspaceId}/projects/${projectId}/board`}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
+        >
+          <KanbanSquare className="w-4 h-4" /> Kanban View
         </Link>
       </div>
-      <h1>Tasks</h1>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{error}</div>
+      )}
 
-      <form
-        onSubmit={(e) => {
-          void handleCreate(e);
-        }}
-        style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}
-      >
-        <input
-          type="text"
-          placeholder="New Task Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          style={{ padding: '0.5rem', flex: 1 }}
-        />
-        <button type="submit" style={{ padding: '0.5rem 1rem', background: '#000', color: '#fff' }}>
-          Add Task
-        </button>
-      </form>
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <form
+          onSubmit={(e) => {
+            void handleCreate(e);
+          }}
+          className="flex gap-4"
+        >
+          <input
+            type="text"
+            placeholder="New Task Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+          />
+          <button
+            type="submit"
+            className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium"
+          >
+            <Plus className="w-4 h-4" /> Add Task
+          </button>
+        </form>
+      </div>
 
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-100">
         {tasks.map((task) => (
-          <li
+          <div
             key={task.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              border: '1px solid #ddd',
-              padding: '1rem',
-              marginBottom: '0.5rem',
-              borderRadius: '4px',
-              opacity: task.status === 'done' ? 0.6 : 1,
-            }}
+            className={`p-4 flex items-center gap-4 transition ${task.status === 'done' ? 'opacity-60 bg-gray-50' : ''}`}
           >
             <input
               type="checkbox"
@@ -125,32 +124,23 @@ export default function ProjectTasksPage() {
               onChange={() => {
                 void toggleStatus(task);
               }}
-              style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+              className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
             />
             <span
-              style={{ textDecoration: task.status === 'done' ? 'line-through' : 'none', flex: 1 }}
+              className={`flex-1 ${task.status === 'done' ? 'line-through text-gray-500' : 'text-gray-900'}`}
             >
               {task.title}
-              {task.parent_task_id && (
-                <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '0.5rem' }}>
-                  (subtask)
-                </span>
-              )}
+              {task.parent_task_id && <span className="text-xs text-gray-400 ml-2">(subtask)</span>}
             </span>
-            <span
-              style={{
-                fontSize: '0.8rem',
-                background: '#eee',
-                padding: '0.2rem 0.5rem',
-                borderRadius: '4px',
-              }}
-            >
+            <span className="text-xs font-medium px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md">
               {task.priority}
             </span>
-          </li>
+          </div>
         ))}
-        {tasks.length === 0 && <p>No tasks yet. Create one above.</p>}
-      </ul>
+        {tasks.length === 0 && (
+          <div className="p-8 text-center text-gray-500">Belum ada task. Buat satu di atas.</div>
+        )}
+      </div>
     </div>
   );
 }

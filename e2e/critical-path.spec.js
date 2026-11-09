@@ -61,7 +61,7 @@ test('critical path: login → org switch → workspace → project → task', a
   // Create workspace
   const wsName = `E2E Workspace ${runId}`;
   const wsSlug = `e2e-ws-${runId}`;
-  await page.fill('input[placeholder="Workspace Name"]', wsName);
+  await page.fill('input[placeholder="Nama Workspace"]', wsName);
   await page.fill('input[placeholder="slug-name"]', wsSlug);
   await page.getByRole('button', { name: 'Create' }).click();
   await expect(page.getByText(wsName)).toBeVisible();
@@ -89,7 +89,7 @@ test('critical path: login → org switch → workspace → project → task', a
   await expect(page.getByText(taskTitle)).toBeVisible();
 
   // Toggle task status
-  const taskRow = page.locator('li', { hasText: taskTitle });
+  const taskRow = page.locator('div', { hasText: taskTitle }).first();
   await taskRow.locator('input[type="checkbox"]').click();
   await expect(taskRow.locator('input[type="checkbox"]')).toBeChecked();
 });

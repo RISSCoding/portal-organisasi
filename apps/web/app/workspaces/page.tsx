@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Plus, LayoutGrid, ArrowLeft } from 'lucide-react';
 
 interface Workspace {
   id: string;
@@ -20,13 +21,10 @@ export default function WorkspacesPage() {
 
   const fetchWorkspaces = async () => {
     const res = await fetch('/api/workspaces');
-    if (res.status === 401) {
-      // User is logged in but no active org is set yet -> go to dashboard
-      return router.push('/dashboard');
-    }
+    if (res.status === 401) return router.push('/login');
+    if (res.status === 403) return router.push('/dashboard');
     if (res.ok) {
-      const data = (await res.json()) as Workspace[];
-      setWorkspaces(data);
+      setWorkspaces((await res.json()) as Workspace[]);
     }
   };
 
@@ -55,65 +53,85 @@ export default function WorkspacesPage() {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <Link href="/dashboard" style={{ color: 'blue' }}>
-          &larr; Back to Dashboard
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/dashboard"
+          className="p-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
         </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Workspaces</h1>
+          <p className="text-gray-500 text-sm">Kelola ruang kerja organisasi Anda.</p>
+        </div>
       </div>
-      <h1>Workspaces</h1>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{error}</div>
+      )}
 
-      <form
-        onSubmit={(e) => {
-          void handleCreate(e);
-        }}
-        style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}
-      >
-        <input
-          type="text"
-          placeholder="Workspace Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          style={{ padding: '0.5rem' }}
-        />
-        <input
-          type="text"
-          placeholder="slug-name"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          required
-          pattern="^[a-z0-9-]+$"
-          style={{ padding: '0.5rem' }}
-        />
-        <button type="submit" style={{ padding: '0.5rem 1rem', background: '#000', color: '#fff' }}>
-          Create
-        </button>
-      </form>
-
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {workspaces.map((ws) => (
-          <li
-            key={ws.id}
-            style={{
-              border: '1px solid #ddd',
-              padding: '1rem',
-              marginBottom: '0.5rem',
-              borderRadius: '4px',
-            }}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Plus className="w-5 h-5 text-primary" /> Buat Workspace Baru
+        </h2>
+        <form
+          onSubmit={(e) => {
+            void handleCreate(e);
+          }}
+          className="flex gap-4"
+        >
+          <input
+            type="text"
+            placeholder="Nama Workspace"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+          />
+          <input
+            type="text"
+            placeholder="slug-name"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            required
+            pattern="^[a-z0-9-]+$"
+            className="w-48 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition"
+          />
+          <button
+            type="submit"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium"
           >
-            <Link href={`/workspaces/${ws.id}`} style={{ textDecoration: 'none', color: '#000' }}>
-              <h3 style={{ margin: 0 }}>
-                {ws.name} <span style={{ color: '#666', fontSize: '0.9rem' }}>/{ws.slug}</span>
-              </h3>
-            </Link>
-            <p style={{ margin: '0.5rem 0' }}>{ws.description || 'No description'}</p>
-          </li>
+            Create
+          </button>
+        </form>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {workspaces.map((ws) => (
+          <Link key={ws.id} href={`/workspaces/${ws.id}`} className="block group">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 group-hover:border-primary group-hover:shadow-md transition h-full">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                  <LayoutGrid className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-gray-900 group-hover:text-primary transition">
+                  {ws.name}
+                </h3>
+              </div>
+              <p className="text-sm text-gray-500">/{ws.slug}</p>
+              <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                {ws.description || 'No description'}
+              </p>
+            </div>
+          </Link>
         ))}
-        {workspaces.length === 0 && <p>No workspaces yet. Create one above.</p>}
-      </ul>
+        {workspaces.length === 0 && (
+          <div className="col-span-full p-8 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
+            Belum ada workspace. Buat satu di atas.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
