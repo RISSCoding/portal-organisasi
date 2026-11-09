@@ -44,7 +44,6 @@ test('finance flow: create budget, submit expense, approve', async ({ page, requ
   await page.click('button[type="submit"]');
   await expect(page).toHaveURL(/\/dashboard$/);
 
-  // Tunggu auto-switch
   await expect(page.getByText(orgName)).toBeVisible();
   await expect(page.getByText('Active', { exact: true })).toBeVisible();
 
@@ -52,53 +51,50 @@ test('finance flow: create budget, submit expense, approve', async ({ page, requ
   await page.goto('/finance');
   await expect(page.getByRole('heading', { name: 'Keuangan' })).toBeVisible();
 
-  // 4. Create Budget (Scope ke form Budget)
-  const budgetForm = page.locator('form').filter({ hasText: 'Buat Anggaran Baru' });
-  await budgetForm.locator('input[placeholder="Nama Anggaran"]').fill('Kas Kegiatan');
-  await budgetForm.locator('input[placeholder="Jumlah (Rp)"]').fill('1000000');
-  await budgetForm.locator('button:has-text("Simpan")').click();
-  
+  // 4. Create Budget (Scope by unique placeholder)
+  const budgetForm = page.locator('form').filter({ has: page.getByPlaceholder('Nama Anggaran') });
+  await budgetForm.getByPlaceholder('Nama Anggaran').fill('Kas Kegiatan');
+  await budgetForm.getByPlaceholder('Jumlah (Rp)').fill('1000000');
+  await budgetForm.getByRole('button', { name: 'Simpan' }).click();
+
   // Verify budget appears in table
   await expect(page.getByRole('cell', { name: 'Kas Kegiatan' })).toBeVisible();
   await expect(page.getByRole('row', { name: /Kas Kegiatan/ }).getByRole('cell').nth(1)).toHaveText('1,000,000');
   await expect(page.getByRole('row', { name: /Kas Kegiatan/ }).getByRole('cell').nth(2)).toHaveText('0');
   await expect(page.getByRole('row', { name: /Kas Kegiatan/ }).getByRole('cell').nth(3)).toHaveText('1,000,000');
 
-  // 5. Create Expense (Scope ke form Expense)
-  const expenseForm = page.locator('form').filter({ hasText: 'Ajukan Pengeluaran' });
-  await expenseForm.locator('input[placeholder="Judul Pengeluaran"]').fill('Beli Spidol');
-  await expenseForm.locator('input[placeholder="Jumlah (Rp)"]').fill('50000');
+  // 5. Create Expense (Scope by unique placeholder)
+  const expenseForm = page.locator('form').filter({ has: page.getByPlaceholder('Judul Pengeluaran') });
+  await expenseForm.getByPlaceholder('Judul Pengeluaran').fill('Beli Spidol');
+  await expenseForm.getByPlaceholder('Jumlah (Rp)').fill('50000');
   await expenseForm.locator('select').selectOption({ label: 'Kas Kegiatan' });
-  await expenseForm.locator('button:has-text("Ajukan")').click();
+  await expenseForm.getByRole('button', { name: 'Ajukan' }).click();
 
   // Verify expense appears and is pending
   await expect(page.getByRole('cell', { name: 'Beli Spidol' })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'PENDING' })).toBeVisible();
 
-  // 6. Approve via API (since UI for approval isn't built yet)
+  // 6. Approve via API
   const loginRes = await request.post(`${API_VIA_WEB}/api/auth/login`, { data: { email, password } });
   const cookie = loginRes.headers()['set-cookie'];
 
-  // PENTING: Set active org untuk session API ini
   await request.post(`${API_VIA_WEB}/api/auth/switch-org`, {
     headers: { Cookie: cookie },
     data: { orgId: org.id }
   });
-  
+
   const expensesRes = await request.get(`${API_VIA_WEB}/api/finance/expenses/all`, { headers: { Cookie: cookie } });
   const expensesData = await expensesRes.json();
   const expenseId = expensesData[0].id;
 
-  await request.patch(`${API_VIA_WEB}/api/finance/expenses/${expenseId}/status`, { 
+  await request.patch(`${API_VIA_WEB}/api/finance/expenses/${expenseId}/status`, {
     headers: { Cookie: cookie },
     data: { status: 'approved' }
   });
 
-  // 7. Verify UI updates (refresh)
+  // 7. Verify UI updates
   await page.reload();
   await expect(page.getByRole('cell', { name: 'APPROVED' })).toBeVisible();
-  
-  // Verify budget "used_amount" is now 50,000
   await expect(page.getByRole('row', { name: /Kas Kegiatan/ }).getByRole('cell').nth(2)).toHaveText('50,000');
   await expect(page.getByRole('row', { name: /Kas Kegiatan/ }).getByRole('cell').nth(3)).toHaveText('950,000');
 });

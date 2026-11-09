@@ -48,7 +48,7 @@ test('HR leave request flow', async ({ page, request }) => {
 
   // 3. Go to HR Leaves
   await page.goto('/hr/leaves');
-  await expect(page.getByText('Sisa Kuota Cuti:')).toBeVisible();
+  await expect(page.getByText('Sisa Kuota Cuti', { exact: true })).toBeVisible();
   await expect(page.getByText('12 Hari')).toBeVisible();
 
   // Intercept API response to see what the server says

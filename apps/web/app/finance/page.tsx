@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, Wallet, Plus } from 'lucide-react';
 
 interface Budget {
   id: string;
@@ -23,16 +24,14 @@ export default function FinancePage() {
   const router = useRouter();
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
   const [budgetName, setBudgetName] = useState('');
   const [budgetAmount, setBudgetAmount] = useState('');
-
   const [expenseTitle, setExpenseTitle] = useState('');
   const [expenseAmount, setExpenseAmount] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('');
-
-  const [error, setError] = useState('');
 
   const fetchData = async () => {
     const [resBud, resExp] = await Promise.all([
@@ -41,28 +40,16 @@ export default function FinancePage() {
     ]);
 
     if (resBud.status === 401 || resExp.status === 401) return router.push('/login');
-
     if (resBud.ok) {
-      const budData = (await resBud.json()) as Budget[];
-      // Pastikan amount dan used_amount menjadi Number
+      const data = (await resBud.json()) as Budget[];
       setBudgets(
-        budData.map((b) => ({
-          ...b,
-          amount: Number(b.amount),
-          used_amount: Number(b.used_amount),
-        })),
+        data.map((b) => ({ ...b, amount: Number(b.amount), used_amount: Number(b.used_amount) })),
       );
     }
     if (resExp.ok) {
-      const expData = (await resExp.json()) as Expense[];
-      setExpenses(
-        expData.map((e) => ({
-          ...e,
-          amount: Number(e.amount),
-        })),
-      );
+      const data = (await resExp.json()) as Expense[];
+      setExpenses(data.map((e) => ({ ...e, amount: Number(e.amount) })));
     }
-
     setLoading(false);
   };
 
@@ -78,10 +65,8 @@ export default function FinancePage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: budgetName, amount: parseFloat(budgetAmount) }),
     });
-
     if (!res.ok) {
-      const err = (await res.json()) as { error?: { message: string } };
-      setError(err.error?.message || 'Failed to create budget');
+      setError('Failed to create budget');
       return;
     }
     setBudgetName('');
@@ -101,10 +86,8 @@ export default function FinancePage() {
         budgetId: selectedBudget || undefined,
       }),
     });
-
     if (!res.ok) {
-      const err = (await res.json()) as { error?: { message: string } };
-      setError(err.error?.message || 'Failed to create expense');
+      setError('Failed to create expense');
       return;
     }
     setExpenseTitle('');
@@ -112,35 +95,45 @@ export default function FinancePage() {
     void fetchData();
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div className="p-8 text-center text-gray-500">Loading...</div>;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <Link href="/dashboard" style={{ color: 'blue' }}>
-          &larr; Back to Dashboard
-        </Link>
-      </div>
-      <h1>Keuangan</h1>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
-        <form
-          onSubmit={(e) => {
-            void handleCreateBudget(e);
-          }}
-          style={{ flex: 1, border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}
+    <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/dashboard"
+          className="p-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition"
         >
-          <h3>Buat Anggaran Baru</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Keuangan</h1>
+          <p className="text-gray-500 text-sm">Kelola anggaran dan pengeluaran.</p>
+        </div>
+      </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{error}</div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Wallet className="w-5 h-5 text-primary" /> Buat Anggaran
+          </h2>
+          <form
+            onSubmit={(e) => {
+              void handleCreateBudget(e);
+            }}
+            className="space-y-4"
+          >
             <input
               type="text"
               placeholder="Nama Anggaran"
               value={budgetName}
               onChange={(e) => setBudgetName(e.target.value)}
               required
-              style={{ padding: '0.5rem' }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition"
             />
             <input
               type="number"
@@ -148,29 +141,34 @@ export default function FinancePage() {
               value={budgetAmount}
               onChange={(e) => setBudgetAmount(e.target.value)}
               required
-              style={{ padding: '0.5rem' }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition"
             />
-            <button type="submit" style={{ padding: '0.5rem', background: '#000', color: '#fff' }}>
+            <button
+              type="submit"
+              className="w-full py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium"
+            >
               Simpan
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
 
-        <form
-          onSubmit={(e) => {
-            void handleCreateExpense(e);
-          }}
-          style={{ flex: 1, border: '1px solid #ddd', padding: '1rem', borderRadius: '4px' }}
-        >
-          <h3>Ajukan Pengeluaran</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Plus className="w-5 h-5 text-primary" /> Ajukan Pengeluaran
+          </h2>
+          <form
+            onSubmit={(e) => {
+              void handleCreateExpense(e);
+            }}
+            className="space-y-4"
+          >
             <input
               type="text"
               placeholder="Judul Pengeluaran"
               value={expenseTitle}
               onChange={(e) => setExpenseTitle(e.target.value)}
               required
-              style={{ padding: '0.5rem' }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition"
             />
             <input
               type="number"
@@ -178,12 +176,12 @@ export default function FinancePage() {
               value={expenseAmount}
               onChange={(e) => setExpenseAmount(e.target.value)}
               required
-              style={{ padding: '0.5rem' }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition"
             />
             <select
               value={selectedBudget}
               onChange={(e) => setSelectedBudget(e.target.value)}
-              style={{ padding: '0.5rem' }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition"
             >
               <option value="">(Tanpa Anggaran)</option>
               {budgets.map((b) => (
@@ -192,77 +190,81 @@ export default function FinancePage() {
                 </option>
               ))}
             </select>
-            <button type="submit" style={{ padding: '0.5rem', background: '#000', color: '#fff' }}>
+            <button
+              type="submit"
+              className="w-full py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium"
+            >
               Ajukan
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
-      <h2>Daftar Anggaran</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
-            <th style={{ padding: '0.5rem' }}>Nama</th>
-            <th style={{ padding: '0.5rem' }}>Total (Rp)</th>
-            <th style={{ padding: '0.5rem' }}>Terpakai (Rp)</th>
-            <th style={{ padding: '0.5rem' }}>Sisa (Rp)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {budgets.map((b) => (
-            <tr key={b.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '0.5rem' }}>{b.name}</td>
-              <td style={{ padding: '0.5rem' }}>{b.amount.toLocaleString()}</td>
-              <td style={{ padding: '0.5rem' }}>{b.used_amount.toLocaleString()}</td>
-              <td style={{ padding: '0.5rem' }}>{(b.amount - b.used_amount).toLocaleString()}</td>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900">Daftar Anggaran</h2>
+        </div>
+        <table className="w-full text-left">
+          <thead className="bg-gray-50 text-gray-600 text-sm">
+            <tr>
+              <th className="px-6 py-3 font-medium">Nama</th>
+              <th className="px-6 py-3 font-medium">Total (Rp)</th>
+              <th className="px-6 py-3 font-medium">Terpakai (Rp)</th>
+              <th className="px-6 py-3 font-medium">Sisa (Rp)</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {budgets.map((b) => (
+              <tr key={b.id} className="hover:bg-gray-50 transition">
+                <td className="px-6 py-4 font-medium text-gray-900">{b.name}</td>
+                <td className="px-6 py-4 text-gray-700">{b.amount.toLocaleString()}</td>
+                <td className="px-6 py-4 text-gray-700">{b.used_amount.toLocaleString()}</td>
+                <td className="px-6 py-4 font-medium text-green-600">
+                  {(b.amount - b.used_amount).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      <h2>Riwayat Pengeluaran Saya</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ borderBottom: '2px solid #ddd', textAlign: 'left' }}>
-            <th style={{ padding: '0.5rem' }}>Judul</th>
-            <th style={{ padding: '0.5rem' }}>Anggaran</th>
-            <th style={{ padding: '0.5rem' }}>Jumlah (Rp)</th>
-            <th style={{ padding: '0.5rem' }}>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {expenses.map((e) => (
-            <tr key={e.id} style={{ borderBottom: '1px solid #eee' }}>
-              <td style={{ padding: '0.5rem' }}>{e.title}</td>
-              <td style={{ padding: '0.5rem' }}>{e.budget_name || '-'}</td>
-              <td style={{ padding: '0.5rem' }}>{e.amount.toLocaleString()}</td>
-              <td style={{ padding: '0.5rem' }}>
-                <span
-                  style={{
-                    padding: '0.2rem 0.5rem',
-                    borderRadius: '4px',
-                    background:
-                      e.status === 'approved'
-                        ? '#d4edda'
-                        : e.status === 'rejected'
-                          ? '#f8d7da'
-                          : '#fff3cd',
-                    color:
-                      e.status === 'approved'
-                        ? '#155724'
-                        : e.status === 'rejected'
-                          ? '#721c24'
-                          : '#856404',
-                  }}
-                >
-                  {e.status.toUpperCase()}
-                </span>
-              </td>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-900">Riwayat Pengeluaran Saya</h2>
+        </div>
+        <table className="w-full text-left">
+          <thead className="bg-gray-50 text-gray-600 text-sm">
+            <tr>
+              <th className="px-6 py-3 font-medium">Judul</th>
+              <th className="px-6 py-3 font-medium">Anggaran</th>
+              <th className="px-6 py-3 font-medium">Jumlah (Rp)</th>
+              <th className="px-6 py-3 font-medium">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {expenses.map((e) => (
+              <tr key={e.id} className="hover:bg-gray-50 transition">
+                <td className="px-6 py-4 font-medium text-gray-900">{e.title}</td>
+                <td className="px-6 py-4 text-gray-700">{e.budget_name || '-'}</td>
+                <td className="px-6 py-4 text-gray-700">{e.amount.toLocaleString()}</td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      e.status === 'approved'
+                        ? 'bg-green-100 text-green-700'
+                        : e.status === 'rejected'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-yellow-100 text-yellow-700'
+                    }`}
+                  >
+                    {e.status.toUpperCase()}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

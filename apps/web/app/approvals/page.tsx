@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, CheckCircle, XCircle, FileCheck } from 'lucide-react';
 
 interface ApprovalRequest {
   id: string;
@@ -22,10 +23,7 @@ export default function ApprovalsPage() {
   const fetchRequests = async () => {
     const res = await fetch('/api/approvals');
     if (res.status === 401) return router.push('/login');
-    if (res.ok) {
-      const data = (await res.json()) as ApprovalRequest[];
-      setRequests(data);
-    }
+    if (res.ok) setRequests((await res.json()) as ApprovalRequest[]);
     setLoading(false);
   };
 
@@ -41,13 +39,10 @@ export default function ApprovalsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, description }),
     });
-
     if (!res.ok) {
-      const err = (await res.json()) as { error?: { message?: string } };
-      setError(err.error?.message || 'Failed to create request');
+      setError('Failed to create request');
       return;
     }
-
     setTitle('');
     setDescription('');
     void fetchRequests();
@@ -59,150 +54,117 @@ export default function ApprovalsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action }),
     });
-
-    if (res.ok) {
-      void fetchRequests();
-    } else {
-      alert('Failed to perform action. Only owner/admin can approve.');
-    }
+    if (res.ok) void fetchRequests();
+    else alert('Gagal. Hanya owner/admin yang bisa approve.');
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div className="p-8 text-center text-gray-500">Loading...</div>;
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <Link href="/dashboard" style={{ color: 'blue' }}>
-          &larr; Back to Dashboard
-        </Link>
-      </div>
-      <h1>Approval Requests</h1>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      <form
-        onSubmit={(e) => {
-          void handleCreate(e);
-        }}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          marginBottom: '2rem',
-          border: '1px solid #ddd',
-          padding: '1rem',
-          borderRadius: '4px',
-        }}
-      >
-        <h3 style={{ margin: 0 }}>New Request</h3>
-        <input
-          type="text"
-          placeholder="Request Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          style={{ padding: '0.5rem' }}
-        />
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-          rows={3}
-          style={{ padding: '0.5rem' }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: '0.5rem 1rem',
-            background: '#000',
-            color: '#fff',
-            alignSelf: 'flex-start',
-          }}
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/dashboard"
+          className="p-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition"
         >
-          Submit Request
-        </button>
-      </form>
+          <ArrowLeft className="w-5 h-5 text-gray-600" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Approval Requests</h1>
+          <p className="text-gray-500 text-sm">Kelola persetujuan dokumen dan pengajuan.</p>
+        </div>
+      </div>
 
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {requests.map((req) => (
-          <li
-            key={req.id}
-            style={{
-              border: '1px solid #ddd',
-              padding: '1rem',
-              marginBottom: '0.5rem',
-              borderRadius: '4px',
-            }}
+      {error && (
+        <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{error}</div>
+      )}
+
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <FileCheck className="w-5 h-5 text-primary" /> Buat Request Baru
+        </h2>
+        <form
+          onSubmit={(e) => {
+            void handleCreate(e);
+          }}
+          className="space-y-4"
+        >
+          <input
+            type="text"
+            placeholder="Request Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition"
+          />
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition"
+          />
+          <button
+            type="submit"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition font-medium"
           >
-            <div
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
-            >
-              <div>
-                <h3 style={{ margin: 0 }}>{req.title}</h3>
-                <span style={{ fontSize: '0.8rem', color: '#666' }}>
-                  {new Date(req.created_at).toLocaleString()}
-                </span>
-              </div>
+            Submit Request
+          </button>
+        </form>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+        {requests.map((req) => (
+          <div
+            key={req.id}
+            className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
+            <div>
+              <h3 className="font-bold text-gray-900">{req.title}</h3>
+              <p className="text-xs text-gray-500 mt-1">
+                {new Date(req.created_at).toLocaleString()}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
               <span
-                style={{
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '4px',
-                  background:
-                    req.status === 'approved'
-                      ? '#d4edda'
-                      : req.status === 'rejected'
-                        ? '#f8d7da'
-                        : '#fff3cd',
-                  color:
-                    req.status === 'approved'
-                      ? '#155724'
-                      : req.status === 'rejected'
-                        ? '#721c24'
-                        : '#856404',
-                }}
+                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  req.status === 'approved'
+                    ? 'bg-green-100 text-green-700'
+                    : req.status === 'rejected'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                }`}
               >
                 {req.status.toUpperCase()}
               </span>
+              {req.status === 'pending' && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      void handleAction(req.id, 'approve');
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition text-sm font-medium"
+                  >
+                    <CheckCircle className="w-4 h-4" /> Approve
+                  </button>
+                  <button
+                    onClick={() => {
+                      void handleAction(req.id, 'reject');
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition text-sm font-medium"
+                  >
+                    <XCircle className="w-4 h-4" /> Reject
+                  </button>
+                </div>
+              )}
             </div>
-            {req.status === 'pending' && (
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                <button
-                  onClick={() => {
-                    void handleAction(req.id, 'approve');
-                  }}
-                  style={{
-                    padding: '0.3rem 0.8rem',
-                    background: 'green',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() => {
-                    void handleAction(req.id, 'reject');
-                  }}
-                  style={{
-                    padding: '0.3rem 0.8rem',
-                    background: 'red',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Reject
-                </button>
-              </div>
-            )}
-          </li>
+          </div>
         ))}
-        {requests.length === 0 && <p>No approval requests yet.</p>}
-      </ul>
+        {requests.length === 0 && (
+          <div className="p-8 text-center text-gray-500">Belum ada request.</div>
+        )}
+      </div>
     </div>
   );
 }
